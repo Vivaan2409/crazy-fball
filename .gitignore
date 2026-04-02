@@ -1,0 +1,9 @@
+training/
+runs/
+output_videos/
+uploads/
+static/
+*.pt
+*.mp4
+*.avi
+__pycache__/
