@@ -23,12 +23,12 @@ from view_transformer import ViewTransformer
 from speed_and_distance_estimator import SpeedAndDistance_Estimator
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'football-analysis-secret-key-2024'
-app.config['UPLOAD_FOLDER'] = 'static/uploads'
-app.config['PROCESSED_FOLDER'] = 'static/processed'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'football-analysis-secret-key-2024')
+app.config['UPLOAD_FOLDER'] = os.environ.get('UPLOAD_FOLDER', 'static/uploads')
+app.config['PROCESSED_FOLDER'] = os.environ.get('PROCESSED_FOLDER', 'static/processed')
 app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500MB max file size
 app.config['ALLOWED_EXTENSIONS'] = {'mp4', 'avi', 'mov', 'mkv', 'webm'}
-app.config['FFMPEG_PATH'] = 'ffmpeg'  # Update this if ffmpeg is in different location
+app.config['FFMPEG_PATH'] = os.environ.get('FFMPEG_PATH', 'ffmpeg')
 
 # Create necessary directories
 for folder in [app.config['UPLOAD_FOLDER'], app.config['PROCESSED_FOLDER'], 'stubs']:
@@ -936,141 +936,6 @@ def not_found(e):
 def internal_error(e):
     return jsonify({'error': 'Internal server error'}), 500
 
-# Create templates if they don't exist
-def create_default_templates():
-    """Create default HTML templates if they don't exist"""
-    templates_dir = 'templates'
-    os.makedirs(templates_dir, exist_ok=True)
-    
-    # Create error.html
-    error_html = '''<!DOCTYPE html>
-<html>
-<head>
-    <title>Error - Football Analysis</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; text-align: center; }
-        .error-container { max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #ddd; border-radius: 10px; }
-        .error-code { font-size: 72px; color: #dc3545; margin: 20px 0; }
-        .back-link { display: inline-block; margin-top: 20px; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; }
-    </style>
-</head>
-<body>
-    <div class="error-container">
-        <h1>Football Analysis System</h1>
-        <div class="error-code">⚠️</div>
-        <h2>{{ message }}</h2>
-        <p>Video ID: {{ video_id }}</p>
-        <a href="/" class="back-link">Back to Home</a>
-    </div>
-</body>
-</html>'''
-    
-    # Create diagnostic.html
-    diagnostic_html = '''<!DOCTYPE html>
-<html>
-<head>
-    <title>Video Diagnostic - Football Analysis</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .container { max-width: 1000px; margin: 0 auto; }
-        .card { border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin: 20px 0; }
-        .video-test { display: flex; flex-wrap: wrap; gap: 20px; }
-        video { max-width: 100%; border: 1px solid #ccc; }
-        table { width: 100%; border-collapse: collapse; }
-        td, th { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        pre { background: #f5f5f5; padding: 10px; border-radius: 5px; overflow: auto; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Video Diagnostic Information</h1>
-        
-        <div class="card">
-            <h2>File Information</h2>
-            <table>
-                <tr><th>Video ID</th><td>{{ video_id }}</td></tr>
-                <tr><th>File Path</th><td>{{ video_path }}</td></tr>
-                <tr><th>File Size</th><td>{{ file_size_mb }} MB</td></tr>
-                {% for key, value in video_info.items() %}
-                <tr><th>{{ key }}</th><td>{{ value }}</td></tr>
-                {% endfor %}
-            </table>
-        </div>
-        
-        <div class="card">
-            <h2>Video Playback Tests</h2>
-            <div class="video-test">
-                <div>
-                    <h3>Test 1: Direct Video Route</h3>
-                    <video controls width="400">
-                        <source src="/video/{{ video_id }}" type="video/mp4">
-                    </video>
-                    <p>URL: <code>/video/{{ video_id }}</code></p>
-                </div>
-                <div>
-                    <h3>Test 2: Static File</h3>
-                    <video controls width="400">
-                        <source src="/static/processed/{{ video_id }}.mp4" type="video/mp4">
-                    </video>
-                    <p>URL: <code>/static/processed/{{ video_id }}.mp4</code></p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="card">
-            <h2>Quick Links</h2>
-            <p><a href="/preview/{{ video_id }}">Full Preview Page</a></p>
-            <p><a href="/download/{{ video_id }}">Download Video</a></p>
-            <p><a href="/">Back to Home</a></p>
-        </div>
-        
-        <div class="card">
-            <h2>Browser Console Output</h2>
-            <p>Open browser developer tools (F12) and check the Console tab for any errors.</p>
-            <button onclick="testVideo()">Test Video Loading</button>
-            <div id="test-result"></div>
-        </div>
-    </div>
-    
-    <script>
-        function testVideo() {
-            const resultDiv = document.getElementById('test-result');
-            resultDiv.innerHTML = '<p>Testing video loading...</p>';
-            
-            const video = document.createElement('video');
-            video.src = '/video/{{ video_id }}';
-            
-            const checkLoaded = setInterval(() => {
-                if (video.readyState >= 2) { // HAVE_CURRENT_DATA
-                    clearInterval(checkLoaded);
-                    resultDiv.innerHTML = '<p style="color: green">✓ Video loaded successfully</p>';
-                }
-            }, 100);
-            
-            setTimeout(() => {
-                clearInterval(checkLoaded);
-                resultDiv.innerHTML = '<p style="color: red">✗ Video loading timeout</p>';
-            }, 5000);
-            
-            video.load();
-        }
-    </script>
-</body>
-</html>'''
-    
-    # Write templates
-    with open(os.path.join(templates_dir, 'error.html'), 'w') as f:
-        f.write(error_html)
-    
-    with open(os.path.join(templates_dir, 'diagnostic.html'), 'w') as f:
-        f.write(diagnostic_html)
-    
-    print(f"Created default templates in {templates_dir}")
-
-# Check if templates exist, create if not
-if not os.path.exists('templates'):
-    create_default_templates()
-
 if __name__ == '__main__':
     # Create necessary directories
     for folder in ['static', 'static/uploads', 'static/processed', 'stubs', 'templates']:
@@ -1089,14 +954,17 @@ if __name__ == '__main__':
         print("⚠ FFmpeg not found. Install for better video compatibility.")
     
     # Run the app
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('FLASK_DEBUG', 'true').lower() == 'true'
+    
     print("\n" + "="*50)
-    print("Football Video Analysis System")
+    print("⚽ FootballVision AI")
     print("="*50)
     print(f"Upload folder: {app.config['UPLOAD_FOLDER']}")
     print(f"Processed folder: {app.config['PROCESSED_FOLDER']}")
     print(f"Max file size: {app.config['MAX_CONTENT_LENGTH'] / (1024*1024)}MB")
-    print(f"Memory optimization: Enabled (auto-scaling for large videos)")
-    print(f"Server starting on: http://localhost:5000")
+    print(f"Memory optimization: Enabled")
+    print(f"Server starting on: http://localhost:{port}")
     print("="*50 + "\n")
     
-    app.run(debug=True, host='0.0.0.0', port=5000, threaded=True)
+    app.run(debug=debug, host='0.0.0.0', port=port, threaded=True)

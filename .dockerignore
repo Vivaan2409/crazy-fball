@@ -1,0 +1,34 @@
+# Virtual environments
+venv/
+env/
+.venv/
+fball/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Local data (Will be re-created or uploaded)
+input_videos/
+output_videos/
+uploads/
+static/uploads/*
+static/processed/*
+stubs/*
+
+# Git
+.git/
+.gitignore
+
+# IDEs
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Notebooks
+*.ipynb

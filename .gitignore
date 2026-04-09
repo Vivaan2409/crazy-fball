@@ -1,9 +1,45 @@
+# Virtual environments
+venv/
+env/
+.venv/
+fball/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Training & model outputs
 training/
 runs/
 output_videos/
+
+# User uploaded & processed files
 uploads/
-static/
-*.pt
+static/uploads/
+static/processed/
+
+# Model weights
+!models/*.pt
+
+# Video files
 *.mp4
 *.avi
-__pycache__/
+
+# IDE
+.vscode/
+.idea/
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Stubs (cached analysis data)
+stubs/*.pkl

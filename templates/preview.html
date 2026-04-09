@@ -3,934 +3,800 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Preview - Football Analysis System</title>
+    <title>Analysis Preview — FootballVision AI</title>
+    <meta name="description" content="Preview your AI-analyzed football match video with player tracking, team stats, and ball control metrics.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg-primary: #06080f;
+            --bg-secondary: #0c1220;
+            --bg-card: rgba(255, 255, 255, 0.04);
+            --bg-card-hover: rgba(255, 255, 255, 0.07);
+            --bg-elevated: rgba(255, 255, 255, 0.06);
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-accent: rgba(99, 102, 241, 0.4);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-indigo: #818cf8;
+            --accent-violet: #a78bfa;
+            --accent-emerald: #34d399;
+            --accent-cyan: #22d3ee;
+            --accent-rose: #fb7185;
+            --accent-amber: #fbbf24;
+            --gradient-cta: linear-gradient(135deg, #6366f1, #8b5cf6);
+            --gradient-cta-hover: linear-gradient(135deg, #4f46e5, #7c3aed);
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            font-family: var(--font-body);
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
-            padding: 20px;
-            color: #333;
+            -webkit-font-smoothing: antialiased;
         }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            animation: slideIn 0.5s ease-out;
+
+        a { color: inherit; text-decoration: none; }
+
+        /* Background */
+        .bg-mesh {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
         }
-        
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .header {
-            background: linear-gradient(45deg, #2c3e50, #4a6491);
-            color: white;
-            padding: 30px 40px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .header::before {
-            content: '⚽';
+
+        .bg-mesh .orb {
             position: absolute;
-            font-size: 200px;
-            opacity: 0.1;
-            right: -50px;
-            top: -50px;
-            transform: rotate(15deg);
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.25;
         }
-        
-        .header h1 {
-            font-size: 36px;
-            margin-bottom: 10px;
-            font-weight: 700;
-            position: relative;
-            z-index: 1;
+
+        .bg-mesh .orb:nth-child(1) {
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.3), transparent 70%);
+            top: -10%; right: -5%;
         }
-        
-        .header p {
-            opacity: 0.9;
-            font-size: 18px;
-            max-width: 800px;
+
+        .bg-mesh .orb:nth-child(2) {
+            width: 400px; height: 400px;
+            background: radial-gradient(circle, rgba(52, 211, 153, 0.2), transparent 70%);
+            bottom: -10%; left: 20%;
+        }
+
+        /* Top Bar */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(6, 8, 15, 0.85);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 0.8rem 0;
+        }
+
+        .topbar-inner {
+            max-width: 1200px;
             margin: 0 auto;
-            line-height: 1.6;
-            position: relative;
-            z-index: 1;
+            padding: 0 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
-        
-        .video-container {
-            padding: 40px;
-            text-align: center;
-            background: #000;
-            position: relative;
-            min-height: 500px;
+
+        .topbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .topbar-brand .brand-icon {
+            width: 30px; height: 30px;
+            background: var(--gradient-cta);
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 0.9rem;
         }
-        
-        video {
-            max-width: 100%;
-            max-height: 70vh;
-            border-radius: 15px;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
-            background: #000;
-            transition: transform 0.3s ease;
-        }
-        
-        video:hover {
-            transform: scale(1.01);
-        }
-        
-        .video-info {
-            position: absolute;
-            bottom: 20px;
-            left: 0;
-            right: 0;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 14px;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 0 0 15px 15px;
-        }
-        
-        .controls {
-            padding: 30px 40px;
-            background: #f8f9fa;
-            border-top: 1px solid #dee2e6;
+
+        .topbar-actions {
             display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
+            gap: 0.6rem;
         }
-        
+
         .btn {
-            padding: 15px 30px;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        .btn i {
-            font-size: 18px;
-        }
-        
-        .btn-download {
-            background: linear-gradient(45deg, #28a745, #20c997);
-            color: white;
-        }
-        
-        .btn-download:hover {
-            background: linear-gradient(45deg, #218838, #1ba87e);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
-        }
-        
-        .btn-home {
-            background: linear-gradient(45deg, #007bff, #6610f2);
-            color: white;
-        }
-        
-        .btn-home:hover {
-            background: linear-gradient(45deg, #0069d9, #5a0fd9);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
-        }
-        
-        .btn-new {
-            background: linear-gradient(45deg, #6c757d, #495057);
-            color: white;
-        }
-        
-        .btn-new:hover {
-            background: linear-gradient(45deg, #5a6268, #3a4047);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(108, 117, 125, 0.3);
-        }
-        
-        .stats {
-            padding: 30px 40px;
-            background: white;
-            border-bottom: 1px solid #dee2e6;
-            display: none; /* Hidden by default, shown by JS */
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-        }
-        
-        .stat-card {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            padding: 25px;
-            border-radius: 15px;
-            border-left: 5px solid #007bff;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .stat-card.team1 {
-            border-left-color: #dc3545;
-        }
-        
-        .stat-card.team2 {
-            border-left-color: #28a745;
-        }
-        
-        .stat-card.overall {
-            border-left-color: #6c757d;
-        }
-        
-        .stat-card h3 {
-            color: #495057;
-            font-size: 16px;
-            margin-bottom: 15px;
+            gap: 0.4rem;
+            padding: 0.55rem 1.2rem;
+            border: none;
+            border-radius: var(--radius-sm);
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+            transition: var(--transition);
+            cursor: pointer;
+            font-family: var(--font-body);
+            white-space: nowrap;
         }
-        
-        .stat-card .value {
-            font-size: 36px;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 5px;
+
+        .btn-primary {
+            background: var(--gradient-cta);
+            color: white;
+            box-shadow: 0 2px 12px rgba(99, 102, 241, 0.25);
         }
-        
-        .stat-card small {
-            color: #6c757d;
-            font-size: 14px;
+
+        .btn-primary:hover { background: var(--gradient-cta-hover); transform: translateY(-1px); }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-subtle);
         }
-        
-        .loading {
+
+        .btn-secondary:hover { background: var(--bg-card-hover); border-color: var(--border-accent); }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            border: none;
+        }
+
+        .btn-ghost:hover { color: var(--text-primary); }
+
+        .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+
+        /* Main Layout */
+        .main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        /* Video Player Section */
+        .player-wrap {
+            background: #000;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            position: relative;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .player-wrap video {
+            width: 100%;
+            display: block;
+            max-height: 70vh;
+        }
+
+        .player-controls-overlay {
+            position: absolute;
+            top: 0.8rem;
+            right: 0.8rem;
             display: flex;
-            flex-direction: column;
+            gap: 0.4rem;
+            z-index: 10;
+        }
+
+        .ctrl-btn {
+            width: 36px; height: 36px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            color: white;
+            display: flex;
             align-items: center;
             justify-content: center;
-            text-align: center;
-            padding: 60px;
-            color: #6c757d;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.85rem;
         }
-        
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #007bff;
+
+        .ctrl-btn:hover {
+            background: rgba(0, 0, 0, 0.8);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .player-info-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .player-status {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .player-status .dot {
+            width: 6px; height: 6px;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
+            background: var(--accent-emerald);
         }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+
+        /* Keyboard shortcuts info */
+        .shortcuts {
+            margin-top: 1rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            font-size: 0.75rem;
+            color: var(--text-muted);
         }
-        
-        .error {
-            text-align: center;
-            padding: 40px;
-            color: #dc3545;
-            background: #f8d7da;
-            margin: 20px;
-            border-radius: 15px;
-            border: 1px solid #f5c6cb;
+
+        .shortcut {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .shortcut kbd {
+            padding: 0.15rem 0.4rem;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            border-radius: 4px;
+            font-family: var(--font-body);
+            font-size: 0.7rem;
+        }
+
+        /* Sidebar Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: var(--font-display);
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 1.2rem;
+        }
+
+        .card-title i { color: var(--accent-indigo); font-size: 0.95rem; }
+
+        /* Stats */
+        .stat-row {
+            margin-bottom: 1.2rem;
+        }
+
+        .stat-row:last-child { margin-bottom: 0; }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .stat-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+        }
+
+        .stat-dot.t1 { background: var(--accent-rose); }
+        .stat-dot.t2 { background: var(--accent-emerald); }
+        .stat-dot.overall { background: var(--accent-indigo); }
+
+        .stat-value {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-bar {
+            height: 6px;
+            background: var(--bg-elevated);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .stat-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 1.2s ease;
+        }
+
+        .stat-bar-fill.t1 { background: linear-gradient(90deg, var(--accent-rose), #f472b6); }
+        .stat-bar-fill.t2 { background: linear-gradient(90deg, var(--accent-emerald), var(--accent-cyan)); }
+
+        .stat-detail {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.3rem;
+        }
+
+        /* Video Meta */
+        .meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.6rem;
+        }
+
+        .meta-item {
+            background: var(--bg-elevated);
+            border-radius: var(--radius-sm);
+            padding: 0.7rem;
+        }
+
+        .meta-item .meta-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.2rem;
+        }
+
+        .meta-item .meta-val {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* Error */
+        .error-banner {
             display: none;
+            background: rgba(251, 113, 133, 0.1);
+            border: 1px solid rgba(251, 113, 133, 0.2);
+            border-radius: var(--radius-md);
+            padding: 1.2rem;
+            margin-top: 1rem;
         }
-        
-        .error h3 {
-            margin-bottom: 15px;
-            font-size: 24px;
-        }
-        
-        .error ul {
-            text-align: left;
-            margin: 20px auto;
-            max-width: 500px;
-            padding-left: 20px;
-        }
-        
-        .error li {
-            margin-bottom: 8px;
-        }
-        
-        .video-controls {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 10;
+
+        .error-banner h4 {
+            color: var(--accent-rose);
+            margin-bottom: 0.5rem;
             display: flex;
-            gap: 10px;
+            align-items: center;
+            gap: 0.4rem;
         }
-        
-        .video-controls button {
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background 0.3s ease;
+
+        .error-banner p { font-size: 0.85rem; color: var(--text-secondary); }
+
+        .error-banner ul {
+            margin: 0.6rem 0 0 1.2rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
         }
-        
-        .video-controls button:hover {
-            background: rgba(0, 0, 0, 0.9);
-        }
-        
-        .quality-selector {
-            margin-top: 15px;
+
+        .error-banner ul li { margin-bottom: 0.3rem; }
+
+        .error-actions { display: flex; gap: 0.5rem; margin-top: 0.8rem; flex-wrap: wrap; }
+
+        /* Loading */
+        .loading-overlay {
             text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
         }
-        
-        .quality-selector select {
-            padding: 8px 15px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            background: white;
-            font-size: 14px;
-            cursor: pointer;
+
+        .loading-spinner {
+            width: 40px; height: 40px;
+            border: 3px solid var(--border-subtle);
+            border-top-color: var(--accent-indigo);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin: 0 auto 1rem;
         }
-        
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-            
-            .header {
-                padding: 20px;
-            }
-            
-            .header h1 {
-                font-size: 28px;
-            }
-            
-            .header p {
-                font-size: 16px;
-            }
-            
-            .video-container {
-                padding: 20px;
-                min-height: 300px;
-            }
-            
-            video {
-                max-height: 50vh;
-            }
-            
-            .controls {
-                padding: 20px;
-                flex-direction: column;
-            }
-            
-            .btn {
-                width: 100%;
-                justify-content: center;
-            }
-            
-            .stats {
-                padding: 20px;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            
-            .stat-card {
-                padding: 20px;
-            }
-            
-            .stat-card .value {
-                font-size: 28px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .header h1 {
-                font-size: 24px;
-            }
-            
-            .header::before {
-                font-size: 100px;
-                right: -30px;
-                top: -30px;
-            }
-            
-            video {
-                border-radius: 10px;
-            }
-            
-            .btn {
-                padding: 12px 20px;
-                font-size: 14px;
-            }
-        }
-        
-        /* Video loading states */
-        .video-loading {
-            position: relative;
-        }
-        
-        .video-loading::after {
-            content: 'Loading video...';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 18px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 10px 20px;
-            border-radius: 5px;
-        }
-        
-        .share-buttons {
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Share */
+        .share-row {
             display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 20px;
+            gap: 0.5rem;
+            margin-top: 1rem;
             flex-wrap: wrap;
         }
-        
-        .share-btn {
-            padding: 8px 15px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            background: white;
-            color: #333;
-            text-decoration: none;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.3s ease;
-        }
-        
-        .share-btn:hover {
-            background: #f8f9fa;
-            transform: translateY(-2px);
-        }
-        
-        .share-btn.copy {
-            background: #007bff;
-            color: white;
-            border: none;
-        }
-        
-        .share-btn.copy:hover {
-            background: #0069d9;
-        }
-        
-        .copy-success {
-            color: #28a745;
-            font-size: 12px;
-            margin-top: 5px;
+
+        .copy-msg {
+            font-size: 0.75rem;
+            color: var(--accent-emerald);
+            margin-top: 0.4rem;
             display: none;
         }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .layout { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .main { padding: 1rem; }
+
+            .player-wrap video { max-height: 50vh; }
+
+            .topbar-actions { gap: 0.4rem; }
+            .btn { padding: 0.45rem 0.8rem; font-size: 0.8rem; }
+
+            .meta-grid { grid-template-columns: 1fr; }
+
+            .shortcuts { display: none; }
+        }
+
+        @media (max-width: 480px) {
+            .topbar-brand span:not(.brand-icon) { display: none; }
+            .topbar-actions .btn span { display: none; }
+        }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1><i class="fas fa-futbol"></i> Football Analysis Preview</h1>
-            <p>Processed video with player tracking, team assignment, speed analysis, and ball control statistics</p>
-        </div>
-        
-        <div class="stats" id="statsSection">
-            <h2 style="text-align: center; margin-bottom: 25px; color: #2c3e50;">
-                <i class="fas fa-chart-bar"></i> Match Statistics
-            </h2>
-            <div class="stats-grid" id="statsGrid">
-                <!-- Stats will be loaded via JavaScript -->
-            </div>
-        </div>
-        
-        <div class="video-container">
-            <div class="video-controls">
-                <button onclick="toggleFullscreen()" title="Fullscreen">
-                    <i class="fas fa-expand"></i>
-                </button>
-                <button onclick="reloadVideo()" title="Reload Video">
-                    <i class="fas fa-redo"></i>
-                </button>
-                <button onclick="toggleMute()" title="Toggle Mute">
-                    <i class="fas fa-volume-up"></i>
-                </button>
-            </div>
-            
-            <video id="videoPlayer" controls autoplay playsinline preload="auto">
-                <source src="{{ direct_video_url }}" type="video/mp4">
-                <source src="{{ video_url }}" type="video/mp4">
-                Your browser does not support the video tag.
-                <track kind="captions" label="English" srclang="en" default>
-            </video>
-            
-            <div class="video-info" id="videoInfo">
-                <div id="videoStatus">Loading video...</div>
-                {% if video_info %}
-                <div style="margin-top: 5px;">
-                    <small>Resolution: {{ video_info.resolution }} | FPS: {{ video_info.fps }} | Duration: {{ video_info.duration }}</small>
-                </div>
-                {% endif %}
-            </div>
-            
-            <div class="quality-selector">
-                <select id="qualitySelect" onchange="changeQuality(this.value)">
-                    <option value="auto">Auto Quality</option>
-                    <option value="{{ direct_video_url }}">Streaming (Adaptive)</option>
-                    <option value="{{ video_url }}">Static File</option>
-                </select>
-            </div>
-        </div>
-        
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <h3>Loading Analysis Results...</h3>
-            <p>Fetching match statistics and video information</p>
-        </div>
-        
-        <div class="error" id="errorMessage">
-            <!-- Error message will be inserted here by JavaScript -->
-        </div>
-        
-        <div class="controls">
-            <a href="/download/{{ video_id }}" class="btn btn-download">
-                <i class="fas fa-download"></i>
-                Download Video
-            </a>
-            <a href="/" class="btn btn-home">
-                <i class="fas fa-home"></i>
-                Back to Home
-            </a>
-            <button onclick="window.location.href='/'" class="btn btn-new">
-                <i class="fas fa-plus-circle"></i>
-                Process New Video
-            </button>
-            <a href="/test_video/{{ video_id }}" class="btn" style="background: #ffc107; color: #212529;">
-                <i class="fas fa-bug"></i>
-                Diagnostics
-            </a>
-        </div>
-        
-        <div class="share-buttons">
-            <button class="share-btn copy" onclick="copyVideoLink()">
-                <i class="fas fa-copy"></i> Copy Video Link
-            </button>
-            <a href="mailto:?subject=Football Analysis Video&body=Check out this analyzed football video: {{ request.host_url }}preview/{{ video_id }}" 
-               class="share-btn">
-                <i class="fas fa-envelope"></i> Email
-            </a>
-            <span class="copy-success" id="copySuccess">Link copied to clipboard!</span>
-        </div>
+    <div class="bg-mesh">
+        <div class="orb"></div>
+        <div class="orb"></div>
     </div>
 
+    <!-- Top Bar -->
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a href="/" class="topbar-brand">
+                <span class="brand-icon">⚽</span>
+                <span>FootballVision AI</span>
+            </a>
+            <div class="topbar-actions">
+                <a href="/download/{{ video_id }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-download"></i> <span>Download</span>
+                </a>
+                <a href="/" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-plus"></i> <span>New Analysis</span>
+                </a>
+                <a href="/" class="btn btn-ghost btn-sm">
+                    <i class="fas fa-home"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main -->
+    <main class="main">
+        <div class="layout">
+            <!-- Video Column -->
+            <div class="video-col">
+                <div class="player-wrap">
+                    <div class="player-controls-overlay">
+                        <button class="ctrl-btn" onclick="toggleFullscreen()" title="Fullscreen (F)">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                        <button class="ctrl-btn" onclick="reloadVideo()" title="Reload (R)">
+                            <i class="fas fa-rotate-right"></i>
+                        </button>
+                        <button class="ctrl-btn" onclick="toggleMute()" title="Mute (M)" id="muteBtn">
+                            <i class="fas fa-volume-up"></i>
+                        </button>
+                    </div>
+
+                    <video id="videoPlayer" controls autoplay playsinline preload="auto">
+                        <source src="{{ direct_video_url }}" type="video/mp4">
+                        <source src="{{ video_url }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+
+                    <div class="player-info-bar">
+                        <div class="player-status">
+                            <span class="dot" id="statusDot"></span>
+                            <span id="videoStatus">Loading...</span>
+                        </div>
+                        <div id="timeDisplay">—</div>
+                        {% if video_info %}
+                        <div>{{ video_info.resolution }} · {{ video_info.fps }}fps · {{ video_info.duration }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="error-banner" id="errorBanner"></div>
+
+                <div class="shortcuts">
+                    <div class="shortcut"><kbd>Space</kbd> Play/Pause</div>
+                    <div class="shortcut"><kbd>F</kbd> Fullscreen</div>
+                    <div class="shortcut"><kbd>M</kbd> Mute</div>
+                    <div class="shortcut"><kbd>←</kbd><kbd>→</kbd> Seek ±10s</div>
+                    <div class="shortcut"><kbd>↑</kbd><kbd>↓</kbd> Volume</div>
+                </div>
+
+                <div class="share-row">
+                    <button class="btn btn-secondary btn-sm" onclick="copyLink()">
+                        <i class="fas fa-copy"></i> Copy Link
+                    </button>
+                    <a href="mailto:?subject=Football Analysis Video&body=Check out this analyzed football video: {{ request.host_url }}preview/{{ video_id }}"
+                       class="btn btn-secondary btn-sm">
+                        <i class="fas fa-envelope"></i> Email
+                    </a>
+                </div>
+                <div class="copy-msg" id="copyMsg">✓ Link copied to clipboard!</div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar-col">
+                <!-- Loading -->
+                <div class="loading-overlay" id="loadingStats">
+                    <div class="loading-spinner"></div>
+                    <p>Loading statistics...</p>
+                </div>
+
+                <!-- Stats Card -->
+                <div class="card" id="statsCard" style="display:none">
+                    <div class="card-title">
+                        <i class="fas fa-chart-column"></i> Match Statistics
+                    </div>
+                    <div id="statsContent"></div>
+                </div>
+
+                <!-- Video Info -->
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-info-circle"></i> Video Info
+                    </div>
+                    <div class="meta-grid" id="metaGrid">
+                        {% if video_info %}
+                        <div class="meta-item">
+                            <div class="meta-label">Resolution</div>
+                            <div class="meta-val">{{ video_info.resolution }}</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">FPS</div>
+                            <div class="meta-val">{{ video_info.fps }}</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Duration</div>
+                            <div class="meta-val">{{ video_info.duration }}</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Frames</div>
+                            <div class="meta-val">{{ video_info.frames }}</div>
+                        </div>
+                        {% else %}
+                        <div class="meta-item" style="grid-column: span 2; text-align:center;">
+                            <div class="meta-val" style="color:var(--text-muted)">Info unavailable</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="card">
+                    <div class="card-title">
+                        <i class="fas fa-bolt"></i> Actions
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                        <a href="/download/{{ video_id }}" class="btn btn-primary" style="justify-content:center; width:100%;">
+                            <i class="fas fa-download"></i> Download Video
+                        </a>
+                        <a href="/" class="btn btn-secondary" style="justify-content:center; width:100%;">
+                            <i class="fas fa-plus"></i> Process New Video
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const videoPlayer = document.getElementById('videoPlayer');
-            const loading = document.getElementById('loading');
-            const errorMessage = document.getElementById('errorMessage');
-            const statsSection = document.getElementById('statsSection');
-            const statsGrid = document.getElementById('statsGrid');
-            const videoInfo = document.getElementById('videoInfo');
+            const statusDot = document.getElementById('statusDot');
             const videoStatus = document.getElementById('videoStatus');
-            const copySuccess = document.getElementById('copySuccess');
-            
-            // Show loading initially
-            loading.style.display = 'flex';
-            videoStatus.textContent = 'Loading video...';
-            
-            // Fetch stats and video information
+            const timeDisplay = document.getElementById('timeDisplay');
+            const loadingStats = document.getElementById('loadingStats');
+            const statsCard = document.getElementById('statsCard');
+            const statsContent = document.getElementById('statsContent');
+            const errorBanner = document.getElementById('errorBanner');
+
+            // Fetch stats
             fetch(`/status/{{ video_id }}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}`);
-                    }
-                    return response.json();
-                })
+                .then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`))
                 .then(data => {
-                    console.log('Status data:', data);
-                    loading.style.display = 'none';
-                    
-                    if (data.status === 'completed') {
-                        // Show stats section
-                        statsSection.style.display = 'block';
-                        
-                        if (data.stats) {
-                            const team1Percent = ((data.stats.team1_control / data.stats.total_frames) * 100).toFixed(1);
-                            const team2Percent = ((data.stats.team2_control / data.stats.total_frames) * 100).toFixed(1);
-                            
-                            statsGrid.innerHTML = `
-                                <div class="stat-card team1">
-                                    <h3><i class="fas fa-users"></i> Team 1 Ball Control</h3>
-                                    <div class="value">${team1Percent}%</div>
-                                    <small>${data.stats.team1_control} frames controlled</small>
-                                    <div style="margin-top: 10px; height: 8px; background: #e9ecef; border-radius: 4px; overflow: hidden;">
-                                        <div style="width: ${team1Percent}%; height: 100%; background: #dc3545;"></div>
-                                    </div>
+                    loadingStats.style.display = 'none';
+                    if (data.status === 'completed' && data.stats) {
+                        statsCard.style.display = 'block';
+                        const t1 = ((data.stats.team1_control / data.stats.total_frames) * 100).toFixed(1);
+                        const t2 = ((data.stats.team2_control / data.stats.total_frames) * 100).toFixed(1);
+                        const pt = data.stats.processing_time ? data.stats.processing_time.toFixed(1) : '—';
+                        statsContent.innerHTML = `
+                            <div class="stat-row">
+                                <div class="stat-header">
+                                    <span class="stat-label"><span class="stat-dot t1"></span> Team 1</span>
+                                    <span class="stat-value">${t1}%</span>
                                 </div>
-                                <div class="stat-card team2">
-                                    <h3><i class="fas fa-users"></i> Team 2 Ball Control</h3>
-                                    <div class="value">${team2Percent}%</div>
-                                    <small>${data.stats.team2_control} frames controlled</small>
-                                    <div style="margin-top: 10px; height: 8px; background: #e9ecef; border-radius: 4px; overflow: hidden;">
-                                        <div style="width: ${team2Percent}%; height: 100%; background: #28a745;"></div>
-                                    </div>
+                                <div class="stat-bar"><div class="stat-bar-fill t1" style="width:${t1}%"></div></div>
+                                <div class="stat-detail">${data.stats.team1_control} frames</div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-header">
+                                    <span class="stat-label"><span class="stat-dot t2"></span> Team 2</span>
+                                    <span class="stat-value">${t2}%</span>
                                 </div>
-                                <div class="stat-card overall">
-                                    <h3><i class="fas fa-chart-line"></i> Overall Analysis</h3>
-                                    <div class="value">${data.stats.total_frames}</div>
-                                    <small>total frames analyzed</small>
-                                    <div style="margin-top: 10px; font-size: 14px;">
-                                        <i class="fas fa-clock"></i> ${(data.stats.total_frames / 24).toFixed(1)} seconds
-                                        ${data.stats.processing_time ? `<br><i class="fas fa-cog"></i> Processed in ${data.stats.processing_time.toFixed(1)}s` : ''}
-                                    </div>
+                                <div class="stat-bar"><div class="stat-bar-fill t2" style="width:${t2}%"></div></div>
+                                <div class="stat-detail">${data.stats.team2_control} frames</div>
+                            </div>
+                            <div class="stat-row">
+                                <div class="stat-header">
+                                    <span class="stat-label"><span class="stat-dot overall"></span> Total Frames</span>
+                                    <span class="stat-value">${data.stats.total_frames}</span>
                                 </div>
-                            `;
-                        }
+                                <div class="stat-detail">${(data.stats.total_frames / 24).toFixed(1)}s duration · ${pt}s processing</div>
+                            </div>
+                        `;
                     } else if (data.status === 'processing') {
-                        // Still processing
-                        statsSection.style.display = 'block';
-                        statsGrid.innerHTML = `
-                            <div class="stat-card" style="grid-column: 1 / -1; text-align: center;">
-                                <h3><i class="fas fa-cog fa-spin"></i> Still Processing</h3>
-                                <div class="value">${data.progress || 0}%</div>
-                                <small>${data.message || 'Processing video...'}</small>
-                                <div style="margin-top: 15px;">
-                                    <div style="height: 10px; background: #e9ecef; border-radius: 5px; overflow: hidden;">
-                                        <div style="width: ${data.progress || 0}%; height: 100%; background: #007bff; transition: width 0.3s ease;"></div>
-                                    </div>
-                                </div>
+                        statsCard.style.display = 'block';
+                        statsContent.innerHTML = `
+                            <div style="text-align:center; padding:1rem 0;">
+                                <div class="loading-spinner"></div>
+                                <p style="color:var(--text-secondary)">${data.progress || 0}% — ${data.message || 'Processing...'}</p>
                             </div>
                         `;
                     }
                 })
-                .catch(error => {
-                    console.error('Error fetching stats:', error);
-                    loading.style.display = 'none';
-                    statsSection.style.display = 'none';
+                .catch(e => {
+                    loadingStats.style.display = 'none';
+                    console.error('Stats fetch error:', e);
                 });
-            
-            // Video event listeners for better UX
-            videoPlayer.addEventListener('loadeddata', function() {
-                videoStatus.textContent = 'Video loaded ✓';
-                videoStatus.style.color = '#28a745';
-                console.log('Video loaded successfully');
-                
-                // Update video info with actual duration
-                const duration = videoPlayer.duration;
-                if (duration && !isNaN(duration)) {
-                    const mins = Math.floor(duration / 60);
-                    const secs = Math.floor(duration % 60);
-                    videoInfo.innerHTML += `<div style="margin-top: 5px;"><small>Actual duration: ${mins}:${secs.toString().padStart(2, '0')}</small></div>`;
-                }
+
+            // Video events
+            videoPlayer.addEventListener('loadeddata', () => {
+                videoStatus.textContent = 'Loaded';
+                statusDot.style.background = 'var(--accent-emerald)';
             });
-            
-            videoPlayer.addEventListener('playing', function() {
-                videoStatus.textContent = 'Playing ▶';
-                videoStatus.style.color = '#28a745';
+
+            videoPlayer.addEventListener('playing', () => {
+                videoStatus.textContent = 'Playing';
+                statusDot.style.background = 'var(--accent-emerald)';
             });
-            
-            videoPlayer.addEventListener('pause', function() {
-                videoStatus.textContent = 'Paused ⏸';
-                videoStatus.style.color = '#ffc107';
+
+            videoPlayer.addEventListener('pause', () => {
+                videoStatus.textContent = 'Paused';
+                statusDot.style.background = 'var(--accent-amber)';
             });
-            
-            videoPlayer.addEventListener('waiting', function() {
+
+            videoPlayer.addEventListener('waiting', () => {
                 videoStatus.textContent = 'Buffering...';
-                videoStatus.style.color = '#ffc107';
+                statusDot.style.background = 'var(--accent-amber)';
             });
-            
-            videoPlayer.addEventListener('error', function(e) {
-                console.error('Video error:', e, videoPlayer.error);
-                loading.style.display = 'none';
-                
-                let errorMsg = 'Unknown error';
+
+            videoPlayer.addEventListener('error', function (e) {
+                videoStatus.textContent = 'Error';
+                statusDot.style.background = 'var(--accent-rose)';
+
+                let msg = 'Unknown error';
                 if (videoPlayer.error) {
-                    switch(videoPlayer.error.code) {
-                        case 1: errorMsg = 'Video loading aborted'; break;
-                        case 2: errorMsg = 'Network error'; break;
-                        case 3: errorMsg = 'Video decoding error'; break;
-                        case 4: errorMsg = 'Video not supported'; break;
-                    }
+                    const codes = { 1: 'Aborted', 2: 'Network error', 3: 'Decoding error', 4: 'Not supported' };
+                    msg = codes[videoPlayer.error.code] || msg;
                 }
-                
-                errorMessage.style.display = 'block';
-                errorMessage.innerHTML = `
-                    <h3><i class="fas fa-exclamation-triangle"></i> Video Playback Error</h3>
-                    <p>Error: ${errorMsg}</p>
-                    <p>This could be due to:</p>
+
+                errorBanner.style.display = 'block';
+                errorBanner.innerHTML = `
+                    <h4><i class="fas fa-triangle-exclamation"></i> Video Playback Error</h4>
+                    <p>${msg}</p>
                     <ul>
-                        <li>Video encoding not supported by your browser</li>
+                        <li>Video encoding may not be supported</li>
                         <li>Network connectivity issues</li>
-                        <li>Video file corruption</li>
-                        <li>Browser security restrictions</li>
+                        <li>Try downloading the file instead</li>
                     </ul>
-                    <p>Try these solutions:</p>
-                    <div style="margin-top: 20px;">
-                        <a href="/download/{{ video_id }}" class="btn btn-download" style="display: inline-block; margin: 5px; padding: 10px 20px;">
-                            <i class="fas fa-download"></i> Download Video
-                        </a>
-                        <button onclick="tryAlternativeSource()" class="btn" style="display: inline-block; margin: 5px; padding: 10px 20px; background: #6c757d; color: white;">
-                            <i class="fas fa-sync-alt"></i> Try Alternative Source
-                        </button>
-                        <a href="/" class="btn" style="display: inline-block; margin: 5px; padding: 10px 20px; background: #007bff; color: white;">
-                            <i class="fas fa-home"></i> Back to Home
-                        </a>
+                    <div class="error-actions">
+                        <a href="/download/{{ video_id }}" class="btn btn-primary btn-sm"><i class="fas fa-download"></i> Download</a>
+                        <button class="btn btn-secondary btn-sm" onclick="tryAlt()"><i class="fas fa-rotate-right"></i> Try Alt Source</button>
                     </div>
-                    <p style="margin-top: 20px; font-size: 12px; color: #666;">
-                        Technical details: ${videoPlayer.error ? videoPlayer.error.message : 'No error details'}
-                    </p>
                 `;
             });
-            
-            videoPlayer.addEventListener('stalled', function() {
-                videoStatus.textContent = 'Network issue - buffering...';
-                videoStatus.style.color = '#ffc107';
+
+            // Auto-play
+            videoPlayer.play().catch(() => {
+                videoStatus.textContent = 'Click play ▶';
+                statusDot.style.background = 'var(--accent-indigo)';
             });
-            
-            // Try to auto-play
-            const playPromise = videoPlayer.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(e => {
-                    console.log('Auto-play prevented:', e);
-                    videoStatus.textContent = 'Click play button to start ▶';
-                    videoStatus.style.color = '#007bff';
-                });
-            }
-            
-            // Fallback: reload video after 5 seconds if not loaded
+
+            // Fallback reload
             setTimeout(() => {
-                if (videoPlayer.readyState < 2) { // Not loaded enough
-                    console.log('Video taking too long, reloading...');
-                    videoStatus.textContent = 'Reloading video...';
+                if (videoPlayer.readyState < 2) {
+                    videoStatus.textContent = 'Retrying...';
                     videoPlayer.load();
                 }
             }, 5000);
-            
-            // Update quality selector based on available sources
-            const qualitySelect = document.getElementById('qualitySelect');
-            const sources = videoPlayer.querySelectorAll('source');
-            sources.forEach((source, index) => {
-                if (source.src && source.src !== '') {
-                    const option = document.createElement('option');
-                    option.value = source.src;
-                    option.textContent = `Source ${index + 1}`;
-                    qualitySelect.appendChild(option);
+
+            // Time display
+            setInterval(() => {
+                if (videoPlayer.currentTime > 0 && !isNaN(videoPlayer.duration)) {
+                    timeDisplay.textContent = `${fmt(videoPlayer.currentTime)} / ${fmt(videoPlayer.duration)}`;
                 }
-            });
+            }, 500);
         });
-        
-        // Utility functions
+
+        function fmt(s) {
+            const m = Math.floor(s / 60);
+            const sec = Math.floor(s % 60);
+            return `${m}:${sec.toString().padStart(2, '0')}`;
+        }
+
         function toggleFullscreen() {
-            const videoPlayer = document.getElementById('videoPlayer');
+            const v = document.getElementById('videoPlayer');
             if (!document.fullscreenElement) {
-                if (videoPlayer.requestFullscreen) {
-                    videoPlayer.requestFullscreen();
-                } else if (videoPlayer.webkitRequestFullscreen) {
-                    videoPlayer.webkitRequestFullscreen();
-                } else if (videoPlayer.msRequestFullscreen) {
-                    videoPlayer.msRequestFullscreen();
-                }
+                (v.requestFullscreen || v.webkitRequestFullscreen || v.msRequestFullscreen).call(v);
             } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                }
+                (document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen).call(document);
             }
         }
-        
+
         function reloadVideo() {
-            const videoPlayer = document.getElementById('videoPlayer');
-            const videoStatus = document.getElementById('videoStatus');
-            
-            videoStatus.textContent = 'Reloading video...';
-            videoStatus.style.color = '#ffc107';
-            
-            // Store current time
-            const currentTime = videoPlayer.currentTime;
-            
-            videoPlayer.load();
-            
-            // Try to restore position after load
-            setTimeout(() => {
-                if (!isNaN(currentTime) && currentTime > 0) {
-                    videoPlayer.currentTime = currentTime;
-                }
-                videoPlayer.play().catch(e => console.log('Play after reload failed:', e));
-            }, 1000);
+            const v = document.getElementById('videoPlayer');
+            const t = v.currentTime;
+            v.load();
+            setTimeout(() => { v.currentTime = t; v.play().catch(() => { }); }, 500);
         }
-        
+
         function toggleMute() {
-            const videoPlayer = document.getElementById('videoPlayer');
-            const muteBtn = document.querySelector('.video-controls button[title="Toggle Mute"]');
-            
-            videoPlayer.muted = !videoPlayer.muted;
-            muteBtn.innerHTML = videoPlayer.muted ? 
-                '<i class="fas fa-volume-mute"></i>' : 
-                '<i class="fas fa-volume-up"></i>';
+            const v = document.getElementById('videoPlayer');
+            v.muted = !v.muted;
+            document.getElementById('muteBtn').innerHTML = v.muted ?
+                '<i class="fas fa-volume-xmark"></i>' : '<i class="fas fa-volume-up"></i>';
         }
-        
-        function changeQuality(src) {
-            const videoPlayer = document.getElementById('videoPlayer');
-            const videoStatus = document.getElementById('videoStatus');
-            
-            if (src === 'auto') {
-                // Let browser decide
-                videoPlayer.load();
-            } else {
-                videoStatus.textContent = 'Switching source...';
-                videoStatus.style.color = '#ffc107';
-                
-                videoPlayer.src = src;
-                videoPlayer.load();
-                
-                setTimeout(() => {
-                    videoPlayer.play().catch(e => console.log('Play after source change failed:', e));
-                }, 500);
-            }
+
+        function tryAlt() {
+            const v = document.getElementById('videoPlayer');
+            const sources = [...v.querySelectorAll('source')].map(s => s.src);
+            const alt = sources.find(s => s && s !== (v.currentSrc || v.src));
+            if (alt) { v.src = alt; v.load(); v.play().catch(() => { }); }
         }
-        
-        function tryAlternativeSource() {
-            const videoPlayer = document.getElementById('videoPlayer');
-            const currentSrc = videoPlayer.currentSrc || videoPlayer.src;
-            const sources = Array.from(videoPlayer.querySelectorAll('source')).map(s => s.src);
-            
-            // Find a different source
-            const alternativeSrc = sources.find(src => src && src !== currentSrc);
-            
-            if (alternativeSrc) {
-                videoPlayer.src = alternativeSrc;
-                videoPlayer.load();
-                videoPlayer.play().catch(e => console.log('Alternative source play failed:', e));
-                
-                document.getElementById('errorMessage').innerHTML += 
-                    '<p style="margin-top: 10px; color: #28a745;"><i class="fas fa-check-circle"></i> Switched to alternative source</p>';
-            }
+
+        function copyLink() {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                const m = document.getElementById('copyMsg');
+                m.style.display = 'block';
+                setTimeout(() => m.style.display = 'none', 2500);
+            }).catch(() => alert('Copy failed. URL: ' + window.location.href));
         }
-        
-        function copyVideoLink() {
-            const videoLink = window.location.href;
-            navigator.clipboard.writeText(videoLink).then(() => {
-                const copySuccess = document.getElementById('copySuccess');
-                copySuccess.style.display = 'block';
-                setTimeout(() => {
-                    copySuccess.style.display = 'none';
-                }, 3000);
-            }).catch(err => {
-                console.error('Failed to copy: ', err);
-                alert('Failed to copy link. Please copy manually: ' + videoLink);
-            });
-        }
-        
+
         // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            const videoPlayer = document.getElementById('videoPlayer');
-            
-            switch(e.key) {
-                case ' ': // Space bar
-                    e.preventDefault();
-                    if (videoPlayer.paused) {
-                        videoPlayer.play();
-                    } else {
-                        videoPlayer.pause();
-                    }
-                    break;
-                case 'f': // Fullscreen
-                    if (e.ctrlKey || e.metaKey) return;
-                    e.preventDefault();
-                    toggleFullscreen();
-                    break;
-                case 'm': // Mute
-                    e.preventDefault();
-                    toggleMute();
-                    break;
-                case 'r': // Reload
-                    if (e.ctrlKey || e.metaKey) return;
-                    e.preventDefault();
-                    reloadVideo();
-                    break;
-                case 'ArrowRight': // Forward 10 seconds
-                    e.preventDefault();
-                    videoPlayer.currentTime += 10;
-                    break;
-                case 'ArrowLeft': // Backward 10 seconds
-                    e.preventDefault();
-                    videoPlayer.currentTime = Math.max(0, videoPlayer.currentTime - 10);
-                    break;
-                case 'ArrowUp': // Volume up
-                    e.preventDefault();
-                    videoPlayer.volume = Math.min(1, videoPlayer.volume + 0.1);
-                    break;
-                case 'ArrowDown': // Volume down
-                    e.preventDefault();
-                    videoPlayer.volume = Math.max(0, videoPlayer.volume - 0.1);
-                    break;
+        document.addEventListener('keydown', function (e) {
+            const v = document.getElementById('videoPlayer');
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            switch (e.key) {
+                case ' ': e.preventDefault(); v.paused ? v.play() : v.pause(); break;
+                case 'f': case 'F': if (!e.ctrlKey && !e.metaKey) { e.preventDefault(); toggleFullscreen(); } break;
+                case 'm': case 'M': e.preventDefault(); toggleMute(); break;
+                case 'r': case 'R': if (!e.ctrlKey && !e.metaKey) { e.preventDefault(); reloadVideo(); } break;
+                case 'ArrowRight': e.preventDefault(); v.currentTime += 10; break;
+                case 'ArrowLeft': e.preventDefault(); v.currentTime = Math.max(0, v.currentTime - 10); break;
+                case 'ArrowUp': e.preventDefault(); v.volume = Math.min(1, v.volume + 0.1); break;
+                case 'ArrowDown': e.preventDefault(); v.volume = Math.max(0, v.volume - 0.1); break;
             }
         });
-        
-        // Update video time display
-        setInterval(() => {
-            const videoPlayer = document.getElementById('videoPlayer');
-            const videoInfo = document.getElementById('videoInfo');
-            
-            if (videoPlayer.currentTime > 0 && !isNaN(videoPlayer.duration)) {
-                const current = formatTime(videoPlayer.currentTime);
-                const total = formatTime(videoPlayer.duration);
-                
-                // Update a small time display if needed
-                const timeDisplay = videoInfo.querySelector('.time-display');
-                if (!timeDisplay) {
-                    const timeElem = document.createElement('div');
-                    timeElem.className = 'time-display';
-                    timeElem.style = 'font-size: 12px; margin-top: 3px; color: #aaa;';
-                    videoInfo.appendChild(timeElem);
-                }
-                videoInfo.querySelector('.time-display').textContent = `${current} / ${total}`;
-            }
-        }, 1000);
-        
-        function formatTime(seconds) {
-            const mins = Math.floor(seconds / 60);
-            const secs = Math.floor(seconds % 60);
-            return `${mins}:${secs.toString().padStart(2, '0')}`;
-        }
     </script>
 </body>
 </html>

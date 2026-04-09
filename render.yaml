@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: football-analyzer
+    runtime: docker
+    envVars:
+      - key: FLASK_DEBUG
+        value: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PORT
+        value: 10000
+    healthCheckPath: /health
+    autoDeploy: true
