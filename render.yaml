@@ -2,6 +2,7 @@ services:
   - type: web
     name: football-analyzer
     runtime: docker
+    plan: free
     envVars:
       - key: FLASK_DEBUG
         value: false
