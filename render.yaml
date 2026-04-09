@@ -1,14 +1,14 @@
 services:
   - type: web
-    name: football-analyzer
+    name: football-vision-ai
     runtime: docker
     plan: free
+    region: oregon
     envVars:
       - key: FLASK_DEBUG
-        value: false
+        value: "false"
       - key: SECRET_KEY
         generateValue: true
       - key: PORT
-        value: 10000
-    healthCheckPath: /health
+        value: "10000"
     autoDeploy: true
