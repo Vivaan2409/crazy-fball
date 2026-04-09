@@ -12,6 +12,7 @@ numpy>=1.24.0
 torch>=2.0.0
 torchvision>=0.15.0
 ultralytics>=8.0.0
+supervision>=0.16.0
 
 # Data
 pandas>=2.0.0
