@@ -1,12 +1,13 @@
-FROM python:3.11-slim
+FROM python:3.11-slim-bullseye
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV DEBIAN_FRONTEND noninteractive
 
-# Install system dependencies with retries to handle transient network errors
-RUN apt-get update || (sleep 5 && apt-get update) || (sleep 10 && apt-get update) && \
+# Install system dependencies with stable mirrors and retries
+RUN sed -i 's/deb.debian.org/ftp.us.debian.org/g' /etc/apt/sources.list && \
+    apt-get update --fix-missing && \
     apt-get install -y --no-install-recommends \
     ffmpeg \
     libgl1-mesa-glx \
